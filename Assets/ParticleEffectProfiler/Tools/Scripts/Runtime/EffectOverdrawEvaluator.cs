@@ -1,34 +1,66 @@
-#if UNITY_EDITOR
+// #if UNITY_EDITOR
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// 主要用于计算overdraw像素
 /// </summary>
-public class EffectEvla
+public class EffectOverdrawEvaluator
 {
     public Camera _camera;
     SingleEffectEvla singleEffectEvla;
+
     public float time = 0;
-    //采集特效数据的区域大小
+    
+    // @TODO: 512x512 can be the best size?
     int rtSizeWidth = 512;
     int rtSizeHeight = 512;
-    RenderTexture rt;
+    RenderTexture m_RenderTexture;
 
-    public EffectEvla(Camera camera)
-    {
-        SetCamera(camera);
-        rt = new RenderTexture(rtSizeWidth, rtSizeHeight, 0, RenderTextureFormat.ARGB32);
-        singleEffectEvla = new SingleEffectEvla(1);
-    }
+    private UniversalRenderPipelineAsset m_CurrentRenderPipelineAsset;
 
-    public void SetCamera(Camera camera)
+    public EffectOverdrawEvaluator(Camera camera)
     {
         _camera = camera;
-        camera.SetReplacementShader(Shader.Find("ParticleEffectProfiler/OverDraw"), "");
+        
+        m_CurrentRenderPipelineAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+        if (m_CurrentRenderPipelineAsset == null)
+        {
+            // @TODO: Does "renderPipelineAsset == null" mean using built-in graphics render pipeline
+            var overDrawShader = Shader.Find("Hidden/ParticleEffectProfiler/OverDraw");
+            if (overDrawShader == null)
+            {
+                EditorUtility.DisplayDialog("Shader missing error", "Make sure OverDraw.shader is valid!", "OK");
+            }
+            else
+            {
+                _camera.SetReplacementShader(overDrawShader, "");
+            }
+            
+        }
+        else
+        {
+            var pipelineAssetPathArray = AssetDatabase.FindAssets("OverDrawPipeline");
+            if (pipelineAssetPathArray == null || pipelineAssetPathArray.Length < 1)
+            {
+                EditorUtility.DisplayDialog("overDrawRenderPipelineAsset missing error", "Make sure overDrawRenderPipelineAsset is valid!", "OK");
+            }
+            else
+            {
+                var overDrawRenderPipelineAsset =
+                    AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(pipelineAssetPathArray[0]);
+                if (overDrawRenderPipelineAsset != null)
+                {
+                    GraphicsSettings.renderPipelineAsset = overDrawRenderPipelineAsset;
+                }
+            }
+        }
+        
+        m_RenderTexture = new RenderTexture(rtSizeWidth, rtSizeHeight, 0, RenderTextureFormat.ARGB32);
+        singleEffectEvla = new SingleEffectEvla(1);
     }
 
     public void Update()
@@ -43,6 +75,7 @@ public class EffectEvla
     }
 
     #region overdraw
+
     public void RecordOverDrawData(SingleEffectEvla singleEffectEvla)
     {
         int pixTotal = 0;
@@ -60,17 +93,17 @@ public class EffectEvla
         RenderTexture activeTextrue = RenderTexture.active;
 
         //渲染指定范围的rt，并记录范围内所有rgb像素值
-        _camera.targetTexture = rt;
+        _camera.targetTexture = m_RenderTexture;
         _camera.Render();
-        RenderTexture.active = rt;
-        Texture2D texture = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false);
-        texture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        RenderTexture.active = m_RenderTexture;
+        Texture2D texture = new Texture2D(m_RenderTexture.width, m_RenderTexture.height, TextureFormat.ARGB32, false);
+        texture.ReadPixels(new Rect(0, 0, m_RenderTexture.width, m_RenderTexture.height), 0, 0);
         GetOverDrawData(texture, out pixTotal, out pixActualDraw);
 
         //恢复之前激活的渲染纹理
         RenderTexture.active = activeTextrue;
         Texture2D.DestroyImmediate(texture);
-        rt.Release();
+        m_RenderTexture.Release();
         _camera.targetTexture = null;
     }
 
@@ -97,7 +130,6 @@ public class EffectEvla
                 bool isEmptyPix = IsEmptyPix(r, g, b);
                 if (!isEmptyPix)
                 {
-
                     pixTotal++;
                 }
 
@@ -146,6 +178,7 @@ public class EffectEvla
     {
         return r == 0 && g == 0 && b == 0;
     }
+
     #endregion
 }
-#endif
+// #endif

@@ -1,46 +1,32 @@
-﻿#if UNITY_EDITOR
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿// #if UNITY_EDITOR
 using System.Reflection;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 /// <summary>
-/// 特效性能分析工具的管理类
-/// 将此类添加到特效上即可
+/// Component for particle effect profiling
 /// </summary>
-public class ParticleEffectScript : MonoBehaviour {
-
-    public AnimationCurve 粒子数量 = new AnimationCurve();
-    public AnimationCurve DrawCall = new AnimationCurve();
-    public AnimationCurve Overdraw = new AnimationCurve();
-    //特效是否循环播放
-    public bool 循环 = false;
+public class HParticleEffectProfilingComponent : MonoBehaviour
+{
+    public AnimationCurve particleCountAnimationCurve = new AnimationCurve();
+    public AnimationCurve drawCallAnimationCurve = new AnimationCurve();
+    public AnimationCurve overdrawAnimationCurve = new AnimationCurve();
+    
     [Range(1,10)]
-    public int 特效运行时间 = 3;
+    public int effectDuration = 3;
 
-    EffectEvla m_EffectEvla;
+    EffectOverdrawEvaluator M_MEffectOverdrawEvaluator;
     ParticleSystem[] m_ParticleSystems;
     MethodInfo m_CalculateEffectUIDataMethod;
     int m_ParticleCount = 0;
     int m_MaxParticleCount = 0;
 
-    ParticleEffectCurve m_CurveParticleCount;
-    ParticleEffectCurve m_CurveDrawCallCount;
-    ParticleEffectCurve m_CurveOverdraw;
-
-
     void Awake()
     {
-        Debug.Log("开始测试单个粒子系统");
-        Application.targetFrameRate = ParticleEffectCurve.FPS;
-
-        m_CurveParticleCount = new ParticleEffectCurve();
-        m_CurveDrawCallCount = new ParticleEffectCurve();
-        m_CurveOverdraw = new ParticleEffectCurve();
-        m_EffectEvla = new EffectEvla(Camera.main);
+        Debug.Log("Particle vfx profiling starts.");
+        Application.targetFrameRate = AnimationCurveUtils.FPS;
+        
+        M_MEffectOverdrawEvaluator = new EffectOverdrawEvaluator(Camera.main);
     }
 
     void Start()
@@ -53,10 +39,10 @@ public class ParticleEffectScript : MonoBehaviour {
 #endif
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
-        RecordParticleCoun();
-        m_EffectEvla.Update();
+        RecordParticleCount();
+        M_MEffectOverdrawEvaluator?.Update();
 
         UpdateParticleCountCurve();
         UpdateDrawCallCurve();
@@ -65,15 +51,24 @@ public class ParticleEffectScript : MonoBehaviour {
 
     public EffectEvlaData[] GetEffectEvlaData()
     {
-        return m_EffectEvla.GetEffectEvlaData();
+        return M_MEffectOverdrawEvaluator?.GetEffectEvlaData();
     }
 
-    public void RecordParticleCoun()
+    public void RecordParticleCount()
     {
+        if (m_CalculateEffectUIDataMethod == null)
+        {
+            return;
+        }
+        
         m_ParticleCount = 0;
         foreach (var ps in m_ParticleSystems)
         {
             int count = 0;
+            if (ps == null)
+            {
+                continue;
+            }
 #if UNITY_2017_1_OR_NEWER
             object[] invokeArgs = { count, 0.0f, Mathf.Infinity };
             m_CalculateEffectUIDataMethod.Invoke(ps, invokeArgs);
@@ -103,17 +98,18 @@ public class ParticleEffectScript : MonoBehaviour {
 
     void UpdateParticleCountCurve()
     {
-        粒子数量 = m_CurveParticleCount.UpdateAnimationCurve(m_ParticleCount, 循环, 特效运行时间);
+        particleCountAnimationCurve.UpdateAnimationCurve(m_ParticleCount,  effectDuration);
     }
     void UpdateDrawCallCurve()
     {
-        DrawCall = m_CurveDrawCallCount.UpdateAnimationCurve(GetParticleEffectData.GetOnlyParticleEffecDrawCall(), 循环, 特效运行时间);
+        var drawCall = GetParticleEffectData.GetOnlyParticleEffecDrawCall();
+        drawCallAnimationCurve.UpdateAnimationCurve(drawCall, effectDuration);
     }
 
     void UpdateOverdrawCurve()
     {
         EffectEvlaData[] effectEvlaData = this.GetEffectEvlaData();
-        Overdraw = m_CurveOverdraw.UpdateAnimationCurve(effectEvlaData[0].GetPixRate(), 循环, 特效运行时间);
+        overdrawAnimationCurve.UpdateAnimationCurve(effectEvlaData[0].GetPixRate(), effectDuration);
     }
 
 	//监听apply事件
@@ -122,13 +118,13 @@ public class ParticleEffectScript : MonoBehaviour {
     {
         PrefabUtility.prefabInstanceUpdated = delegate(GameObject instance)
         {
-            var particleEffectScript = instance.GetComponentsInChildren<ParticleEffectScript>(true);
+            var particleEffectScript = instance.GetComponentsInChildren<HParticleEffectProfilingComponent>(true);
 
             if (particleEffectScript.Length > 0)
             {
-                Debug.LogError("保存前请先删除ParticleEffectScript脚本！");
+                Debug.LogError("保存前请先删除 HParticleEffectProfilingComponent 脚本！");
             }
         };
     }
 }
-#endif
+// #endif

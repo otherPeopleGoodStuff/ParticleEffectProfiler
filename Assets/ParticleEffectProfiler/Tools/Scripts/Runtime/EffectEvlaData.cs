@@ -1,8 +1,4 @@
-﻿#if UNITY_EDITOR
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿// #if UNITY_EDITOR
 
 /// <summary>
 /// 处理像素计算
@@ -59,4 +55,4 @@ public class EffectEvlaData
         return "平均每像素overdraw率：" + this.GetPixRate();
     }
 }
-#endif
+// #endif

@@ -1,4 +1,4 @@
-﻿Shader "ParticleEffectProfiler/OverDraw"
+﻿Shader "Hidden/ParticleEffectProfiler/OverDraw"
 {
 	SubShader
 	{
@@ -34,9 +34,9 @@
 				return o;
 			}
 
-			fixed4 frag(v2f i) : SV_Target
+			half4 frag(v2f i) : SV_Target
 			{
-				return fixed4(0.1, 0.04, 0.02, 0);
+				return half4(0.1, 0.04, 0.02, 0);
 			}
 			ENDCG
 		}

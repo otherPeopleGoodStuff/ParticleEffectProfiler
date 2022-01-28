@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEngine;
 
@@ -11,7 +13,7 @@ public static class TestParticleEffect
     private static bool _hasPlayed;
     static bool isRestart = false;
 
-    [MenuItem("GameObject/特效/测试", false, 11)]
+    [MenuItem("GameObject/VFX/Profiling", false, 1)]
     private static void Test()
     {
         var go = Selection.activeGameObject;
@@ -36,10 +38,10 @@ public static class TestParticleEffect
             EditorApplication.isPlaying = true;
         }
 
-        var particleEffectScript = go.GetComponentsInChildren<ParticleEffectScript>(true);
+        var particleEffectScript = go.GetComponentsInChildren<HParticleEffectProfilingComponent>(true);
         if (particleEffectScript.Length == 0)
         {
-            go.AddComponent<ParticleEffectScript>();
+            go.AddComponent<HParticleEffectProfilingComponent>();
         }
     }
 
@@ -74,3 +76,5 @@ public static class TestParticleEffect
         }
     }
 }
+
+#endif

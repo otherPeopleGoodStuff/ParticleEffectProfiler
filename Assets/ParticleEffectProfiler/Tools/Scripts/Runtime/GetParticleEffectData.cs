@@ -1,16 +1,14 @@
-﻿#if UNITY_EDITOR
-using System;
-using System.Collections;
+﻿// #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 /// <summary>
 /// 处理特效整体相关的数据
 /// </summary>
-public class GetParticleEffectData {
+public class GetParticleEffectData
+{
 
     static int m_MaxDrawCall = 0;
 
@@ -65,20 +63,21 @@ public class GetParticleEffectData {
         else
             memorySizeStr = string.Format("<color=red>{0}</color>", memorySizeStr);
 
-        return string.Format("贴图所占用的内存：{0}   建议：<{1}\n贴图数量：{2}     建议：<{3}", memorySizeStr, maxMemorySizeStr, FormatColorMax(textureCount, maxTextureCount), maxTextureCount);
+        return
+            $"贴图所占用的内存：{memorySizeStr}   建议：<{maxMemorySizeStr}\n贴图数量：{FormatColorMax(textureCount, maxTextureCount)}     建议：<{maxTextureCount}";
     }
 
     public static string GetParticleSystemCount(GameObject go)
     {
         int max = 5;
         var particleSystems = go.GetComponentsInChildren<ParticleSystem>(true);
-        return string.Format("特效中所有粒子系统组件数量：{0}     建议：<{1}", FormatColorMax(particleSystems.Length, max), max);
+        return $"特效中所有粒子系统组件数量：{FormatColorMax(particleSystems.Length, max)}     建议：<{max}";
     }
 
     public static int GetOnlyParticleEffecDrawCall()
     {
         //因为Camera 实际上渲染了两次，一次用作取样，一次用作显示。 狂飙这里给出了详细的说明：https://networm.me/2019/07/28/unity-particle-effect-profiler/#drawcall-%E6%95%B0%E5%80%BC%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%94%E5%AE%9E%E9%99%85%E5%A4%A7-2-%E5%80%8D
-        int drawCall = UnityEditor.UnityStats.batches / 2;
+        int drawCall = UnityStats.batches / 2;
         if (m_MaxDrawCall<drawCall)
         {
             m_MaxDrawCall = drawCall;
@@ -89,36 +88,38 @@ public class GetParticleEffectData {
     public static string GetOnlyParticleEffecDrawCallStr()
     {
         int max = 10;
-        return string.Format("DrawCall: {0}   最高：{1}   建议：<{2}", FormatColorMax(GetOnlyParticleEffecDrawCall(), max), FormatColorMax(m_MaxDrawCall, max), max);
+        return
+            $"DrawCall: {FormatColorMax(GetOnlyParticleEffecDrawCall(), max)}   最高：{FormatColorMax(m_MaxDrawCall, max)}   建议：<{max}";
     }
 
-    public static string GetPixDrawAverageStr(ParticleEffectScript particleEffectGo)
+    public static string GetPixDrawAverageStr(HParticleEffectProfilingComponent hParticleEffectGo)
     {
         //index = 0：默认按高品质的算，这里你可以根本你们项目的品质进行修改。
-        EffectEvlaData[] effectEvlaData = particleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
         int pixDrawAverage = effectEvlaData[0].GetPixDrawAverage();
-        return string.Format("特效原填充像素点：{0}", FormatColorValue(pixDrawAverage));
+        return $"特效原填充像素点：{FormatColorValue(pixDrawAverage)}";
     }
 
-    public static string GetPixActualDrawAverageStr(ParticleEffectScript particleEffectGo)
+    public static string GetPixActualDrawAverageStr(HParticleEffectProfilingComponent hParticleEffectGo)
     {
-        EffectEvlaData[] effectEvlaData = particleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
         int pixActualDrawAverage = effectEvlaData[0].GetPixActualDrawAverage();
-        return string.Format("特效实际填充像素点：{0}", FormatColorValue(pixActualDrawAverage));
+        return $"特效实际填充像素点：{FormatColorValue(pixActualDrawAverage)}";
     }
 
-    public static string GetPixRateStr(ParticleEffectScript particleEffectGo)
+    public static string GetPixRateStr(HParticleEffectProfilingComponent hParticleEffectGo)
     {
         int max = 4;
-        EffectEvlaData[] effectEvlaData = particleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
         int pixRate = effectEvlaData[0].GetPixRate();
-        return string.Format("平均每像素overdraw率：{0}   建议：<{1}", FormatColorMax(pixRate, max), max);
+        return $"平均每像素overdraw率：{FormatColorMax(pixRate, max)}   建议：<{max}";
     }
 
-    public static string GetParticleCountStr(ParticleEffectScript particleEffectGo)
+    public static string GetParticleCountStr(HParticleEffectProfilingComponent hParticleEffectGo)
     {
         int max = 50;
-        return string.Format("粒子数量：{0}   最高：{1}   建议：<{2}", FormatColorMax(particleEffectGo.GetParticleCount(), max), FormatColorMax(particleEffectGo.GetMaxParticleCount(), max), max);
+        return
+            $"粒子数量：{FormatColorMax(hParticleEffectGo.GetParticleCount(), max)}   最高：{FormatColorMax(hParticleEffectGo.GetMaxParticleCount(), max)}   建议：<{max}";
     }
 
     public static string GetCullingSupportedString(GameObject go)
@@ -193,7 +194,7 @@ public class GetParticleEffectData {
         } 
         if (particleSystem.shape.enabled)
         {
-            ParticleSystemShapeType shapeType = (ParticleSystemShapeType)particleSystem.shape.shapeType;
+            var shapeType = particleSystem.shape.shapeType;
             switch (shapeType)
             {
                 case ParticleSystemShapeType.Cone:
@@ -289,15 +290,15 @@ public class GetParticleEffectData {
 
     static string FormatColorValue(int value)
     {
-        return string.Format("<color=green>{0}</color>", value);
+        return $"<color=green>{value}</color>";
     }
 
     static string FormatColorMax(int value, int max)
     {
         if (max > value)
-            return string.Format("<color=green>{0}</color>", value);
+            return $"<color=green>{value}</color>";
         else
-            return string.Format("<color=red>{0}</color>", value);
+            return $"<color=red>{value}</color>";
     }
 }
-#endif
+// #endif

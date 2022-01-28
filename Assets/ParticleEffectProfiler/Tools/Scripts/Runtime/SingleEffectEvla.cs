@@ -1,7 +1,4 @@
-﻿#if UNITY_EDITOR
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿// #if UNITY_EDITOR
 using UnityEngine;
 
 /// <summary>
@@ -52,4 +49,4 @@ public class SingleEffectEvla {
         _qualityIndex = qualityIndex;
     }
 }
-#endif
+// #endif
