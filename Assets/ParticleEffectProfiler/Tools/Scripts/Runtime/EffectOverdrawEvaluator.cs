@@ -30,35 +30,9 @@ public class EffectOverdrawEvaluator
         if (m_CurrentRenderPipelineAsset == null)
         {
             // @TODO: Does "renderPipelineAsset == null" mean using built-in graphics render pipeline
-            var overDrawShader = Shader.Find("Hidden/ParticleEffectProfiler/OverDraw");
-            if (overDrawShader == null)
-            {
-                EditorUtility.DisplayDialog("Shader missing error", "Make sure OverDraw.shader is valid!", "OK");
-            }
-            else
-            {
-                _camera.SetReplacementShader(overDrawShader, "");
-            }
-            
+            _camera.SetReplacementShader(Shader.Find("Hidden/HRP/ParticleEffectProfiler/OverDraw"), "");
         }
-        else
-        {
-            var pipelineAssetPathArray = AssetDatabase.FindAssets("OverDrawPipeline");
-            if (pipelineAssetPathArray == null || pipelineAssetPathArray.Length < 1)
-            {
-                EditorUtility.DisplayDialog("overDrawRenderPipelineAsset missing error", "Make sure overDrawRenderPipelineAsset is valid!", "OK");
-            }
-            else
-            {
-                var overDrawRenderPipelineAsset =
-                    AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(pipelineAssetPathArray[0]);
-                if (overDrawRenderPipelineAsset != null)
-                {
-                    GraphicsSettings.renderPipelineAsset = overDrawRenderPipelineAsset;
-                }
-            }
-        }
-        
+
         m_RenderTexture = new RenderTexture(rtSizeWidth, rtSizeHeight, 0, RenderTextureFormat.ARGB32);
         singleEffectEvla = new SingleEffectEvla(1);
     }
@@ -181,4 +155,3 @@ public class EffectOverdrawEvaluator
 
     #endregion
 }
-// #endif

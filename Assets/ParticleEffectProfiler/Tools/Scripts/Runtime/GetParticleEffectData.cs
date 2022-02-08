@@ -92,34 +92,34 @@ public class GetParticleEffectData
             $"DrawCall: {FormatColorMax(GetOnlyParticleEffecDrawCall(), max)}   最高：{FormatColorMax(m_MaxDrawCall, max)}   建议：<{max}";
     }
 
-    public static string GetPixDrawAverageStr(HParticleEffectProfilingComponent hParticleEffectGo)
+    public static string GetPixDrawAverageStr(HParticleProfilingComponent hParticleGo)
     {
         //index = 0：默认按高品质的算，这里你可以根本你们项目的品质进行修改。
-        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleGo.GetEffectEvlaData();
         int pixDrawAverage = effectEvlaData[0].GetPixDrawAverage();
         return $"特效原填充像素点：{FormatColorValue(pixDrawAverage)}";
     }
 
-    public static string GetPixActualDrawAverageStr(HParticleEffectProfilingComponent hParticleEffectGo)
+    public static string GetPixActualDrawAverageStr(HParticleProfilingComponent hParticleGo)
     {
-        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleGo.GetEffectEvlaData();
         int pixActualDrawAverage = effectEvlaData[0].GetPixActualDrawAverage();
         return $"特效实际填充像素点：{FormatColorValue(pixActualDrawAverage)}";
     }
 
-    public static string GetPixRateStr(HParticleEffectProfilingComponent hParticleEffectGo)
+    public static string GetPixRateStr(HParticleProfilingComponent hParticleGo)
     {
         int max = 4;
-        EffectEvlaData[] effectEvlaData = hParticleEffectGo.GetEffectEvlaData();
+        EffectEvlaData[] effectEvlaData = hParticleGo.GetEffectEvlaData();
         int pixRate = effectEvlaData[0].GetPixRate();
         return $"平均每像素overdraw率：{FormatColorMax(pixRate, max)}   建议：<{max}";
     }
 
-    public static string GetParticleCountStr(HParticleEffectProfilingComponent hParticleEffectGo)
+    public static string GetParticleCountStr(HParticleProfilingComponent hParticleGo)
     {
         int max = 50;
         return
-            $"粒子数量：{FormatColorMax(hParticleEffectGo.GetParticleCount(), max)}   最高：{FormatColorMax(hParticleEffectGo.GetMaxParticleCount(), max)}   建议：<{max}";
+            $"粒子数量：{FormatColorMax(hParticleGo.GetParticleCount(), max)}   最高：{FormatColorMax(hParticleGo.GetMaxParticleCount(), max)}   建议：<{max}";
     }
 
     public static string GetCullingSupportedString(GameObject go)

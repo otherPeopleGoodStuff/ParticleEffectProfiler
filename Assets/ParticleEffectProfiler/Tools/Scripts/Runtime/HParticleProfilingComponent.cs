@@ -1,12 +1,10 @@
-﻿// #if UNITY_EDITOR
-using System.Reflection;
-using UnityEditor;
+﻿using System.Reflection;
 using UnityEngine;
 
 /// <summary>
 /// Component for particle effect profiling
 /// </summary>
-public class HParticleEffectProfilingComponent : MonoBehaviour
+public class HParticleProfilingComponent : MonoBehaviour
 {
     public AnimationCurve particleCountAnimationCurve = new AnimationCurve();
     public AnimationCurve drawCallAnimationCurve = new AnimationCurve();
@@ -15,7 +13,7 @@ public class HParticleEffectProfilingComponent : MonoBehaviour
     [Range(1,10)]
     public int effectDuration = 3;
 
-    EffectOverdrawEvaluator M_MEffectOverdrawEvaluator;
+    EffectOverdrawEvaluator m_EffectOverdrawEvaluator;
     ParticleSystem[] m_ParticleSystems;
     MethodInfo m_CalculateEffectUIDataMethod;
     int m_ParticleCount = 0;
@@ -25,8 +23,7 @@ public class HParticleEffectProfilingComponent : MonoBehaviour
     {
         Debug.Log("Particle vfx profiling starts.");
         Application.targetFrameRate = AnimationCurveUtils.FPS;
-        
-        M_MEffectOverdrawEvaluator = new EffectOverdrawEvaluator(Camera.main);
+        m_EffectOverdrawEvaluator = new EffectOverdrawEvaluator(Camera.main);
     }
 
     void Start()
@@ -38,11 +35,11 @@ public class HParticleEffectProfilingComponent : MonoBehaviour
         m_CalculateEffectUIDataMethod = typeof(ParticleSystem).GetMethod("CountSubEmitterParticles", BindingFlags.Instance | BindingFlags.NonPublic);
 #endif
     }
-
+    
     void LateUpdate()
     {
         RecordParticleCount();
-        M_MEffectOverdrawEvaluator?.Update();
+        m_EffectOverdrawEvaluator?.Update();
 
         UpdateParticleCountCurve();
         UpdateDrawCallCurve();
@@ -51,7 +48,7 @@ public class HParticleEffectProfilingComponent : MonoBehaviour
 
     public EffectEvlaData[] GetEffectEvlaData()
     {
-        return M_MEffectOverdrawEvaluator?.GetEffectEvlaData();
+        return m_EffectOverdrawEvaluator?.GetEffectEvlaData();
     }
 
     public void RecordParticleCount()
@@ -111,20 +108,4 @@ public class HParticleEffectProfilingComponent : MonoBehaviour
         EffectEvlaData[] effectEvlaData = this.GetEffectEvlaData();
         overdrawAnimationCurve.UpdateAnimationCurve(effectEvlaData[0].GetPixRate(), effectDuration);
     }
-
-	//监听apply事件
-    [InitializeOnLoadMethod]
-    static void StartInitializeOnLoadMethod()
-    {
-        PrefabUtility.prefabInstanceUpdated = delegate(GameObject instance)
-        {
-            var particleEffectScript = instance.GetComponentsInChildren<HParticleEffectProfilingComponent>(true);
-
-            if (particleEffectScript.Length > 0)
-            {
-                Debug.LogError("保存前请先删除 HParticleEffectProfilingComponent 脚本！");
-            }
-        };
-    }
 }
-// #endif

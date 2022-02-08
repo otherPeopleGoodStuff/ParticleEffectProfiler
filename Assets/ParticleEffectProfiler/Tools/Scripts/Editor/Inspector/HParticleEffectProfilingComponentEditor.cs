@@ -4,26 +4,26 @@ using UnityEngine;
 /// <summary>
 /// 将特效的性能数据显示到Scene
 /// </summary>
-[CustomEditor(typeof(HParticleEffectProfilingComponent))] 
+[CustomEditor(typeof(HParticleProfilingComponent))] 
 public class HParticleEffectProfilingComponentEditor : Editor {
 
     string[] m_Label = new string[20];
 
     void OnSceneGUI()
     {
-        HParticleEffectProfilingComponent hParticleEffectProfilingComponent = (HParticleEffectProfilingComponent)target;
+        HParticleProfilingComponent mHParticleProfilingComponent = (HParticleProfilingComponent)target;
 
         int index = 0;
-        m_Label[index] = GetParticleEffectData.GetGetRuntimeMemorySizeStr(hParticleEffectProfilingComponent.gameObject);
-        m_Label[++index] = GetParticleEffectData.GetParticleSystemCount(hParticleEffectProfilingComponent.gameObject);
+        m_Label[index] = GetParticleEffectData.GetGetRuntimeMemorySizeStr(mHParticleProfilingComponent.gameObject);
+        m_Label[++index] = GetParticleEffectData.GetParticleSystemCount(mHParticleProfilingComponent.gameObject);
 
         if (EditorApplication.isPlaying)
         {
             m_Label[++index] = GetParticleEffectData.GetOnlyParticleEffecDrawCallStr();
-            m_Label[++index] = GetParticleEffectData.GetParticleCountStr(hParticleEffectProfilingComponent);
-            m_Label[++index] = GetParticleEffectData.GetPixDrawAverageStr(hParticleEffectProfilingComponent);
-            m_Label[++index] = GetParticleEffectData.GetPixActualDrawAverageStr(hParticleEffectProfilingComponent);
-            m_Label[++index] = GetParticleEffectData.GetPixRateStr(hParticleEffectProfilingComponent);
+            m_Label[++index] = GetParticleEffectData.GetParticleCountStr(mHParticleProfilingComponent);
+            m_Label[++index] = GetParticleEffectData.GetPixDrawAverageStr(mHParticleProfilingComponent);
+            m_Label[++index] = GetParticleEffectData.GetPixActualDrawAverageStr(mHParticleProfilingComponent);
+            m_Label[++index] = GetParticleEffectData.GetPixRateStr(mHParticleProfilingComponent);
         }
 
         ShowUI(); 
@@ -57,9 +57,9 @@ public class HParticleEffectProfilingComponentEditor : Editor {
     {
         base.OnInspectorGUI();
 
-        HParticleEffectProfilingComponent hParticleEffectProfilingComponent = (HParticleEffectProfilingComponent)target;
+        HParticleProfilingComponent particleProfilingComponent = (HParticleProfilingComponent)target;
 
-        string autoCullingTips = GetParticleEffectData.GetCullingSupportedString(hParticleEffectProfilingComponent.gameObject);
+        string autoCullingTips = GetParticleEffectData.GetCullingSupportedString(particleProfilingComponent.gameObject);
         if (!string.IsNullOrEmpty(autoCullingTips))
         {
             GUILayout.Label("ParticleSystem 以下选项会导致无法自动剔除：", EditorStyles.whiteLargeLabel);

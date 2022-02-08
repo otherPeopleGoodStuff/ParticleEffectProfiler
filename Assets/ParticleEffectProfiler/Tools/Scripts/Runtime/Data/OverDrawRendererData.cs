@@ -1,5 +1,4 @@
 ﻿using System;
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
@@ -12,7 +11,7 @@ namespace UnityEngine.Rendering.Universal
     {
 #if UNITY_EDITOR
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812")]
-        internal class CreateOverdrawRendererAsset : EndNameEditAction
+        internal class CreateHOverdrawRendererAsset : EndNameEditAction
         {
             public override void Action(int instanceId, string pathName, string resourceFile)
             {
@@ -26,7 +25,7 @@ namespace UnityEngine.Rendering.Universal
         [MenuItem("Assets/Create/Rendering/Overdraw Renderer", priority = CoreUtils.assetCreateMenuPriority2)]
         static void CreateHOverdrawRendererData()
         {
-            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, CreateInstance<CreateOverdrawRendererAsset>(), "OverdrawRendererData.asset", null, null);
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, CreateInstance<CreateHOverdrawRendererAsset>(), "OverdrawRenderer.asset", null, null);
         }
 #endif
 
